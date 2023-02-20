@@ -1,21 +1,13 @@
-using API.Data;
-using Microsoft.EntityFrameworkCore;
+using API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);//First of all, We use this builder config and this is going to go ahead and create our web application instance effectively which allows us to run our application.
 //When we run net run it comes and takes a look inside this file and executes the code inside here.
 //Anything before app builder.build is considered our services container. 
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-builder.Services.AddDbContext<DataContext>(opt => 
-{
-    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-// // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-// builder.Services.AddEndpointsApiExplorer();
-// builder.Services.AddSwaggerGen();
-builder.Services.AddCors();
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
 //Add middleware before reqeust hits to controller
@@ -31,6 +23,9 @@ var app = builder.Build();
 
 // app.UseAuthorization();
 app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
+
+app.UseAuthentication();//Authentication part just asks, Do you have a valid token?
+app.UseAuthorization();//Authorization part says, okay, you have a valid token now what are you allowed to do?.
 
 app.MapControllers();
 
